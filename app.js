@@ -3,12 +3,13 @@ var express = require('express');
 var app = express();
 var fs = require('fs'),
     path = require('path');
+
 var htmlDir = './html/';
-var directories = getDirs('./html');
+var directories = getDirs(htmlDir);
 directories.forEach(dir => {
   console.log('>>> Registering GET endpoint for /'+dir);
   app.get('/'+dir, (req, res) => {
-    pipePdf(res, './'+dir);
+    pipePdf(res, dir);
   });
 });
 
@@ -18,7 +19,7 @@ app.listen(3000, () => {
 
 
 function pipePdf(res, dir){
-  var filepath = htmlDir +  dir + '/index.html';
+  var filepath = htmlDir + dir + '/index.html';
   console.log('\n>>> converting:', filepath);
   conversion({
     url: filepath,
@@ -28,9 +29,10 @@ function pipePdf(res, dir){
     allowLocalFilesAccess: true,
     phantomPath: require("phantomjs-prebuilt").path
   }, (err, pdf) => {
-    console.log('>>> converted');
+    console.log('>>> converting + ' + filepath + ' results');
     console.log('>>> Errors:', err);
     console.log('>>> Logs:', pdf.logs);
+    console.log('>>> converted + ' + filepath);
     pdf.stream.pipe(res);
   })
 }
